@@ -1,0 +1,1263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>あやの英単語カード</title>
+<style>
+  :root {
+    --bg:#fbfaf7;
+    --paper:#ffffff;
+    --ink:#1e1b18;
+    --muted:#756f68;
+    --line:#e8e1d8;
+    --accent:#8a6f52;
+    --soft:#f1e8dc;
+    --bad:#d96b5f;
+    --warn:#c9953d;
+    --good:#547a56;
+    --shadow: 0 14px 35px rgba(38, 26, 12, .10);
+    --radius: 26px;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0;
+    background: radial-gradient(circle at 20% 0%, #fff 0, var(--bg) 35%, #f7efe6 100%);
+    color:var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    line-height:1.7;
+  }
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 28px 18px 48px;
+  }
+  header {
+    padding: 26px 4px 18px;
+  }
+  .brand {
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing:.03em;
+    color:var(--accent);
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+  h1 {
+    margin:0;
+    font-size: clamp(34px, 8vw, 62px);
+    letter-spacing: .02em;
+    line-height:1.1;
+    font-weight: 800;
+  }
+  .lead {
+    margin: 18px 0 0;
+    color:var(--muted);
+    font-size: 16px;
+  }
+  .panel {
+    background: rgba(255,255,255,.82);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    margin: 16px 0;
+    backdrop-filter: blur(10px);
+  }
+  .actions, .filters, .reviewBtns {
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  button, .fileLabel {
+    border:0;
+    border-radius:999px;
+    padding: 10px 15px;
+    background:var(--soft);
+    color:var(--ink);
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button.active {
+    background:var(--accent);
+    color:white;
+  }
+  button.bad { background:#f6d8d4; color:#8b2d24; }
+  button.warn { background:#f7e7c9; color:#734c0e; }
+  button.good { background:#dceadf; color:#244c28; }
+  button.ghost { background:transparent; border:1px solid var(--line); }
+  input, select, textarea {
+    width:100%;
+    border:1px solid var(--line);
+    border-radius: 16px;
+    padding: 11px 13px;
+    background:white;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .searchRow {
+    display:grid;
+    grid-template-columns: 1fr 140px;
+    gap:10px;
+    margin-top: 12px;
+  }
+  @media (max-width:650px) {
+    .searchRow { grid-template-columns:1fr; }
+  }
+  .stats {
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:10px;
+  }
+  @media (max-width:650px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  .stat {
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius: 20px;
+    padding:14px;
+  }
+  .stat small {
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+  }
+  .stat b {
+    font-size:28px;
+    line-height:1;
+  }
+  .card {
+    min-height: 340px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .chip {
+    display:inline-block;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:999px;
+    padding:4px 10px;
+    font-size:12px;
+    margin-right:5px;
+  }
+  .word {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight:800;
+    font-size: clamp(44px, 12vw, 82px);
+    line-height:1.05;
+    margin: 8px 0 18px;
+    word-break: break-word;
+  }
+  .meaning {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 6px 0 16px;
+  }
+  .example {
+    border-left:4px solid var(--soft);
+    padding-left:14px;
+    margin: 12px 0;
+  }
+  .muted { color:var(--muted); }
+  .hidden { display:none !important; }
+  .empty {
+    text-align:center;
+    color:var(--muted);
+    padding: 38px 10px;
+  }
+  .formGrid {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+  }
+  .formGrid .full { grid-column: 1 / -1; }
+  @media (max-width:650px) {
+    .formGrid { grid-template-columns:1fr; }
+    .formGrid .full { grid-column:auto; }
+  }
+  .footerNote {
+    color:var(--muted);
+    font-size:13px;
+    margin-top: 22px;
+  }
+  input[type=file] { display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">Aya English Lab</div>
+    <h1>あやの英単語カード</h1>
+    <p class="lead">会話・読書・日記から育てる、ゆるい間隔復習つきフラッシュカード。初期単語が0件になっても、復元ボタンで戻せます。</p>
+  </header>
+
+  <section class="panel">
+    <div class="actions">
+      <button id="exportBtn">JSONを書き出し</button>
+      <label class="fileLabel" for="importFile">JSONを読み込み</label>
+      <input id="importFile" type="file" accept="application/json,.json">
+      <button id="restoreBtn" class="ghost">初期単語を再読み込み</button>
+      <button id="clearBtn" class="ghost">学習データを初期化</button>
+    </div>
+    <p class="footerNote">保存はこのブラウザ内です。たまに「JSONを書き出し」でバックアップしてな。</p>
+  </section>
+
+  <section class="stats" aria-label="学習状況">
+    <div class="stat"><small>今日の復習</small><b id="dueCount">0</b></div>
+    <div class="stat"><small>登録単語</small><b id="totalCount">0</b></div>
+    <div class="stat"><small>苦手カード</small><b id="weakCount">0</b></div>
+    <div class="stat"><small>覚えたカード</small><b id="knownCount">0</b></div>
+  </section>
+
+  <section class="panel">
+    <h2>カードを選ぶ</h2>
+    <div class="filters">
+      <button data-filter="today" class="filter active">今日</button>
+      <button data-filter="all" class="filter">全部</button>
+      <button data-filter="weak" class="filter">苦手</button>
+      <button data-filter="new" class="filter">新規</button>
+    </div>
+    <div class="searchRow">
+      <input id="search" placeholder="🔍 word / 意味 / メモ">
+      <select id="tagSelect"><option value="">タグ：全部</option></select>
+    </div>
+    <div class="actions" style="margin-top:12px;">
+      <span id="resultCount" class="muted">0件</span>
+      <button id="shuffleBtn">シャッフル</button>
+    </div>
+  </section>
+
+  <section class="panel card" id="cardBox">
+    <div>
+      <div id="cardTags"></div>
+      <div class="muted" id="cardLabel">WORD</div>
+      <div class="word" id="cardWord">word</div>
+      <p class="muted" id="tapHint">クリック / Space で答えを見る</p>
+      <div id="answer" class="hidden">
+        <div class="meaning" id="cardMeaning"></div>
+        <div class="example"><b id="exampleEn"></b><br><span class="muted" id="exampleJa"></span></div>
+        <p id="cardNote"></p>
+      </div>
+    </div>
+    <div class="reviewBtns">
+      <button class="bad" data-review="again">まだ無理</button>
+      <button class="warn" data-review="hard">不安</button>
+      <button class="good" data-review="easy">覚えた</button>
+    </div>
+  </section>
+
+
+  <section class="panel">
+    <h2>まとめて追加</h2>
+    <p class="muted">1行に1単語ずつ貼り付けて、一括で追加できます。まずは「word,意味」だけでもOK。</p>
+    <textarea id="bulkInput" rows="8" placeholder="例：
+prevent,防ぐ,This medicine helps prevent headaches.,この薬は頭痛を防ぐ助けになる。,prevent A from -ing も大事,日常会話,basic
+attempt,試みる,I attempted to explain it in English.,私はそれを英語で説明しようと試みた。,tryより少し硬め,英作文,intermediate"></textarea>
+    <div class="actions" style="margin-top:12px;">
+      <button id="bulkAddBtn" type="button">まとめて追加する</button>
+      <button id="sampleBulkBtn" type="button" class="ghost">入力例を入れる</button>
+    </div>
+    <p class="footerNote">形式：word,意味,英語例文,日本語訳,メモ,タグ,level。カンマ区切りでもタブ区切りでも使えます。</p>
+  </section>
+
+
+  <section class="panel">
+    <h2>単語を追加</h2>
+    <form id="addForm" class="formGrid">
+      <input name="word" placeholder="word" required>
+      <input name="meaning" placeholder="意味" required>
+      <input name="example_en" placeholder="English example" class="full">
+      <input name="example_ja" placeholder="日本語訳" class="full">
+      <textarea name="note" placeholder="メモ" class="full" rows="3"></textarea>
+      <input name="tag" placeholder="タグ（例：読書）">
+      <select name="level">
+        <option value="basic">basic</option>
+        <option value="intermediate">intermediate</option>
+        <option value="advanced">advanced</option>
+      </select>
+      <button type="submit" class="full">追加する</button>
+    </form>
+  </section>
+
+  <p class="footerNote">Made for Aya. Single-file iPhone version.</p>
+</div>
+
+<script>
+const INITIAL_CARDS = [
+  {
+    "word": "hesitate",
+    "meaning": "ためらう",
+    "example_en": "I hesitated to tell the truth.",
+    "example_ja": "私は真実を話すのをためらった。",
+    "note": "話す・行動する前に迷って止まる感じ。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-001",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "remind",
+    "meaning": "思い出させる",
+    "example_en": "You remind me of my old friend.",
+    "example_ja": "あなたは昔の友達を思い出させる。",
+    "note": "remind 人 of 〜 の形で覚える。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-002",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "remain",
+    "meaning": "残る・〜のままでいる",
+    "example_en": "I want to remain calm.",
+    "example_ja": "落ち着いたままでいたい。",
+    "note": "stayより少し硬めの響き。",
+    "tag": "日常会話",
+    "level": "basic",
+    "id": "aya-003",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "refuse",
+    "meaning": "断る・拒む",
+    "example_en": "He refused my offer.",
+    "example_ja": "彼は私の申し出を断った。",
+    "note": "少し強めに断る感じ。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-004",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "appear",
+    "meaning": "現れる・〜のように見える",
+    "example_en": "Suddenly, she appeared.",
+    "example_ja": "突然、彼女が現れた。",
+    "note": "show upよりやや書き言葉寄りにも使える。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-005",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "forgive",
+    "meaning": "許す",
+    "example_en": "I forgive you.",
+    "example_ja": "私はあなたを許します。",
+    "note": "人を責める気持ちを手放すニュアンス。",
+    "tag": "日常会話",
+    "level": "basic",
+    "id": "aya-006",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "trust",
+    "meaning": "信じる・信頼する",
+    "example_en": "I trust you.",
+    "example_ja": "私はあなたを信じている。",
+    "note": "believeより人への信頼感が強い。",
+    "tag": "日常会話",
+    "level": "basic",
+    "id": "aya-007",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "wonder",
+    "meaning": "〜かなと思う・不思議に思う",
+    "example_en": "I wonder if it’s true.",
+    "example_ja": "それが本当かどうか気になる。",
+    "note": "I wonder if... は会話で便利。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-008",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "prevent",
+    "meaning": "防ぐ",
+    "example_en": "This medicine helps prevent headaches.",
+    "example_ja": "この薬は頭痛を防ぐ助けになる。",
+    "note": "prevent A from -ing の形も大事。",
+    "tag": "日常会話",
+    "level": "basic",
+    "id": "aya-009",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "attempt",
+    "meaning": "試みる・試み",
+    "example_en": "I attempted to explain it in English.",
+    "example_ja": "私はそれを英語で説明しようと試みた。",
+    "note": "tryより少し硬め。",
+    "tag": "英作文",
+    "level": "intermediate",
+    "id": "aya-010",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "courage",
+    "meaning": "勇気",
+    "example_en": "She had the courage to speak.",
+    "example_ja": "彼女には話す勇気があった。",
+    "note": "have the courage to do の形。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-011",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "mistake",
+    "meaning": "間違い",
+    "example_en": "I made a little mistake.",
+    "example_ja": "少し間違えた。",
+    "note": "make a mistake で覚える。",
+    "tag": "英作文",
+    "level": "basic",
+    "id": "aya-012",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "notice",
+    "meaning": "気づく",
+    "example_en": "I noticed a white butterfly outside the window.",
+    "example_ja": "窓の外に白い蝶がいるのに気づいた。",
+    "note": "lookとは違って、ふと気づく感じ。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-013",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "butterfly",
+    "meaning": "蝶",
+    "example_en": "A white butterfly flew past my car window.",
+    "example_ja": "白い蝶が車窓を横切って飛んでいった。",
+    "note": "ドライブ中の風景とセットで覚える。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-014",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "outside the window",
+    "meaning": "窓の外に",
+    "example_en": "A bird was singing outside the window.",
+    "example_ja": "窓の外で鳥が鳴いていた。",
+    "note": "日記で使いやすい表現。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-015",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "reread",
+    "meaning": "読み返す",
+    "example_en": "Today I reread a book I loved before.",
+    "example_ja": "今日は昔好きだった本を読み返した。",
+    "note": "re- が『もう一度』の意味。",
+    "tag": "読書",
+    "level": "basic",
+    "id": "aya-016",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "point of view",
+    "meaning": "視点・見方",
+    "example_en": "I understood it from another point of view.",
+    "example_ja": "別の視点からそれを理解した。",
+    "note": "考え方の違いを言う時に便利。",
+    "tag": "読書",
+    "level": "basic",
+    "id": "aya-017",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "dialogue",
+    "meaning": "対話",
+    "example_en": "It’s like a dialogue with the book.",
+    "example_ja": "それは本との対話みたいだ。",
+    "note": "あやの読書感想にぴったりの言葉。",
+    "tag": "読書",
+    "level": "basic",
+    "id": "aya-018",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "rainy day",
+    "meaning": "雨の日",
+    "example_en": "Today is Sunday and it’s a rainy day.",
+    "example_ja": "今日は日曜日で雨の日です。",
+    "note": "a rainy day と冠詞をつける。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-019",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "relax",
+    "meaning": "くつろぐ・リラックスする",
+    "example_en": "I’m relaxing at home.",
+    "example_ja": "家でくつろいでいます。",
+    "note": "be relaxing で今ゆっくりしてる感じ。",
+    "tag": "日常会話",
+    "level": "basic",
+    "id": "aya-020",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "fleeting",
+    "meaning": "はかない・一瞬の",
+    "example_en": "The beauty of the irises felt fleeting.",
+    "example_ja": "菖蒲の美しさははかなく感じられた。",
+    "note": "詩的な『はかなさ』に合う単語。",
+    "tag": "詩・日記",
+    "level": "intermediate",
+    "id": "aya-021",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "iris",
+    "meaning": "菖蒲・アヤメ",
+    "example_en": "I saw beautiful irises in the park.",
+    "example_ja": "公園できれいな菖蒲を見た。",
+    "note": "複数形は irises。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-022",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "embankment",
+    "meaning": "土手・堤防",
+    "example_en": "I drove along the embankment.",
+    "example_ja": "土手沿いを運転した。",
+    "note": "川沿いの道の描写に使える。",
+    "tag": "ドライブ",
+    "level": "intermediate",
+    "id": "aya-023",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "levee",
+    "meaning": "堤防",
+    "example_en": "The road runs beside the levee.",
+    "example_ja": "その道は堤防のそばを通っている。",
+    "note": "embankmentより堤防感が強い。",
+    "tag": "ドライブ",
+    "level": "intermediate",
+    "id": "aya-024",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "level crossing",
+    "meaning": "踏切",
+    "example_en": "I stopped at a level crossing.",
+    "example_ja": "踏切で止まった。",
+    "note": "イギリス英語寄り。米語では railroad crossing。",
+    "tag": "ドライブ",
+    "level": "intermediate",
+    "id": "aya-025",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "sleepy",
+    "meaning": "眠い",
+    "example_en": "I was sleepy while driving.",
+    "example_ja": "運転中に眠かった。",
+    "note": "I’m sleepy. で日常的に使える。",
+    "tag": "日常会話",
+    "level": "basic",
+    "id": "aya-026",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "refresh",
+    "meaning": "気分転換する・さっぱりさせる",
+    "example_en": "Talking with ChatGPT helped me refresh my mood.",
+    "example_ja": "ChatGPTと話すことで気分転換になった。",
+    "note": "refresh my mood は自然な表現。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-027",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "unbearable",
+    "meaning": "耐えられない",
+    "example_en": "I was filled with unbearable sadness.",
+    "example_ja": "耐えがたい悲しみに満たされた。",
+    "note": "Norwegian Woodの読書に出てきた雰囲気のある語。",
+    "tag": "読書",
+    "level": "advanced",
+    "id": "aya-028",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "drift",
+    "meaning": "漂う・流れていく",
+    "example_en": "The words drifted past me.",
+    "example_ja": "言葉が私のそばを漂うように通り過ぎた。",
+    "note": "水や空気のように流れる感じ。",
+    "tag": "読書",
+    "level": "intermediate",
+    "id": "aya-029",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "scene",
+    "meaning": "場面・景色",
+    "example_en": "Objects in the scene drifted past me.",
+    "example_ja": "場面の中の物たちが私の前を漂っていった。",
+    "note": "映画・小説・日記どれにも使える。",
+    "tag": "読書",
+    "level": "basic",
+    "id": "aya-030",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "limpid",
+    "meaning": "澄んだ・透明な",
+    "example_en": "The water was limpid and quiet.",
+    "example_ja": "水は澄んで静かだった。",
+    "note": "詩的で美しい単語。",
+    "tag": "読書",
+    "level": "advanced",
+    "id": "aya-031",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "comprehend",
+    "meaning": "理解する",
+    "example_en": "I couldn’t fully comprehend the sentence.",
+    "example_ja": "その文を完全には理解できなかった。",
+    "note": "understandより硬め。",
+    "tag": "読書",
+    "level": "intermediate",
+    "id": "aya-032",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "be bound to",
+    "meaning": "きっと〜する・〜する運命にある",
+    "example_en": "You are bound to improve if you keep practicing.",
+    "example_ja": "練習を続ければ、きっと上達する。",
+    "note": "確信が強い表現。",
+    "tag": "読書",
+    "level": "intermediate",
+    "id": "aya-033",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "laundry",
+    "meaning": "洗濯・洗濯物",
+    "example_en": "I did the laundry in the morning.",
+    "example_ja": "朝に洗濯をした。",
+    "note": "do the laundry で覚える。",
+    "tag": "家事",
+    "level": "basic",
+    "id": "aya-034",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "chores",
+    "meaning": "家事・雑用",
+    "example_en": "I have some chores to do today.",
+    "example_ja": "今日はやる家事がいくつかある。",
+    "note": "複数形で使うことが多い。",
+    "tag": "家事",
+    "level": "basic",
+    "id": "aya-035",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "feed",
+    "meaning": "食べ物を与える",
+    "example_en": "I feed my dog vegetables.",
+    "example_ja": "犬に野菜をあげている。",
+    "note": "feed + 人/動物 + 食べ物。",
+    "tag": "犬",
+    "level": "basic",
+    "id": "aya-036",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "vegetable",
+    "meaning": "野菜",
+    "example_en": "He can only eat vegetables as toppings.",
+    "example_ja": "彼はトッピングとして野菜だけ食べられる。",
+    "note": "発音は vege-ta-ble の感じ。",
+    "tag": "犬",
+    "level": "basic",
+    "id": "aya-037",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "bonito",
+    "meaning": "カツオ",
+    "example_en": "A little bonito adds flavor.",
+    "example_ja": "少しのカツオで風味が加わる。",
+    "note": "犬の食事の話から出た単語。",
+    "tag": "料理・犬",
+    "level": "intermediate",
+    "id": "aya-038",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "reasonable",
+    "meaning": "手頃な・妥当な",
+    "example_en": "This T-shirt was reasonably priced.",
+    "example_ja": "このTシャツは手頃な値段だった。",
+    "note": "値段にも判断にも使える。",
+    "tag": "買い物",
+    "level": "basic",
+    "id": "aya-039",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "bargain",
+    "meaning": "お買い得品",
+    "example_en": "This was a real bargain.",
+    "example_ja": "これは本当にお買い得だった。",
+    "note": "買い物日記に便利。",
+    "tag": "買い物",
+    "level": "basic",
+    "id": "aya-040",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "curfew",
+    "meaning": "門限",
+    "example_en": "My phone curfew is 11:30 p.m.",
+    "example_ja": "私のスマホ門限は夜11時半です。",
+    "note": "phone curfew は自分ルールとして使える。",
+    "tag": "日常会話",
+    "level": "intermediate",
+    "id": "aya-041",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  },
+  {
+    "word": "cozy",
+    "meaning": "居心地のよい・ぬくもりのある",
+    "example_en": "I want to have a cozy day at home.",
+    "example_ja": "家で居心地のいい一日を過ごしたい。",
+    "note": "あやの日記に似合う単語。",
+    "tag": "日記",
+    "level": "basic",
+    "id": "aya-042",
+    "status": "new",
+    "correctCount": 0,
+    "wrongCount": 0,
+    "nextReview": "1970-01-01",
+    "createdAt": "2026-06-10"
+  }
+];
+const STORAGE_KEY = "aya_vocab_cards_v2";
+let cards = [];
+let current = 0;
+let flipped = false;
+let filter = "today";
+
+const $ = id => document.getElementById(id);
+const today = () => new Date().toISOString().slice(0,10);
+const addDays = (n) => {
+  const d = new Date();
+  d.setDate(d.getDate()+n);
+  return d.toISOString().slice(0,10);
+};
+
+function normalize(card) {
+  return {
+    id: card.id || "aya-" + crypto.randomUUID(),
+    word: card.word || "",
+    meaning: card.meaning || "",
+    example_en: card.example_en || "",
+    example_ja: card.example_ja || "",
+    note: card.note || "",
+    tag: card.tag || "未分類",
+    level: card.level || "basic",
+    status: card.status || "new",
+    correctCount: Number(card.correctCount || 0),
+    wrongCount: Number(card.wrongCount || 0),
+    nextReview: card.nextReview || "1970-01-01",
+    createdAt: card.createdAt || today()
+  };
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+}
+
+function load() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if (Array.isArray(saved) && saved.length > 0) {
+      cards = saved.map(normalize);
+    } else {
+      cards = INITIAL_CARDS.map(normalize);
+      save();
+    }
+  } catch(e) {
+    cards = INITIAL_CARDS.map(normalize);
+    save();
+  }
+}
+
+function restoreInitial(keepProgress=false) {
+  if (!keepProgress) {
+    cards = INITIAL_CARDS.map(normalize);
+  } else {
+    const map = new Map(cards.map(c => [c.word.toLowerCase(), c]));
+    cards = INITIAL_CARDS.map(c => {
+      const old = map.get(c.word.toLowerCase());
+      return old ? {...normalize(c), status: old.status, correctCount: old.correctCount, wrongCount: old.wrongCount, nextReview: old.nextReview} : normalize(c);
+    });
+  }
+  save();
+  current = 0;
+  flipped = false;
+  render();
+}
+
+function visibleCards() {
+  const q = $("search").value.trim().toLowerCase();
+  const tag = $("tagSelect").value;
+  return cards.filter(c => {
+    const due = !c.nextReview || c.nextReview <= today();
+    if (filter === "today" && !due) return false;
+    if (filter === "weak" && c.status !== "weak") return false;
+    if (filter === "new" && c.status !== "new") return false;
+    if (tag && c.tag !== tag) return false;
+    if (q) {
+      const hay = [c.word, c.meaning, c.example_en, c.example_ja, c.note, c.tag].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function updateTags() {
+  const tagSelect = $("tagSelect");
+  const selected = tagSelect.value;
+  const tags = [...new Set(cards.map(c => c.tag).filter(Boolean))].sort();
+  tagSelect.innerHTML = '<option value="">タグ：全部</option>' + tags.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  tagSelect.value = tags.includes(selected) ? selected : "";
+}
+
+function renderStats() {
+  $("dueCount").textContent = cards.filter(c => !c.nextReview || c.nextReview <= today()).length;
+  $("totalCount").textContent = cards.length;
+  $("weakCount").textContent = cards.filter(c => c.status === "weak").length;
+  $("knownCount").textContent = cards.filter(c => c.status === "known").length;
+}
+
+function escapeHtml(s) {
+  return String(s || "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]));
+}
+
+function renderCard() {
+  const list = visibleCards();
+  $("resultCount").textContent = list.length + "件";
+  if (list.length === 0) {
+    $("cardBox").querySelector(".reviewBtns").classList.add("hidden");
+    $("cardTags").innerHTML = "";
+    $("cardLabel").textContent = "EMPTY";
+    $("cardWord").textContent = "カードがありません";
+    $("tapHint").textContent = "フィルターを変えるか、初期単語を再読み込みしてな。";
+    $("answer").classList.add("hidden");
+    return;
+  }
+  $("cardBox").querySelector(".reviewBtns").classList.remove("hidden");
+  if (current >= list.length) current = 0;
+  const c = list[current];
+  $("cardTags").innerHTML = `<span class="chip">${escapeHtml(c.tag)}</span><span class="chip">${escapeHtml(c.level)}</span><span class="chip">${escapeHtml(c.status)}</span>`;
+  $("cardLabel").textContent = "WORD";
+  $("cardWord").textContent = c.word;
+  $("cardMeaning").textContent = c.meaning;
+  $("exampleEn").textContent = c.example_en || "例文なし";
+  $("exampleJa").textContent = c.example_ja || "";
+  $("cardNote").textContent = c.note || "";
+  $("tapHint").textContent = flipped ? "クリック / Space で次のカードへ" : "クリック / Space で答えを見る";
+  $("answer").classList.toggle("hidden", !flipped);
+}
+
+function render() {
+  updateTags();
+  renderStats();
+  renderCard();
+}
+
+function nextCard() {
+  const list = visibleCards();
+  if (list.length) current = (current + 1) % list.length;
+  flipped = false;
+  render();
+}
+
+function flipOrNext() {
+  if (!flipped) {
+    flipped = true;
+    renderCard();
+  } else {
+    nextCard();
+  }
+}
+
+function review(kind) {
+  const list = visibleCards();
+  if (!list.length) return;
+  const card = list[current];
+  const original = cards.find(c => c.id === card.id);
+  if (!original) return;
+  if (kind === "again") {
+    original.status = "weak";
+    original.wrongCount += 1;
+    original.nextReview = today();
+  }
+  if (kind === "hard") {
+    original.status = "weak";
+    original.wrongCount += 1;
+    original.nextReview = addDays(1);
+  }
+  if (kind === "easy") {
+    original.status = "known";
+    original.correctCount += 1;
+    const interval = Math.min(30, Math.max(3, original.correctCount * 4));
+    original.nextReview = addDays(interval);
+  }
+  save();
+  nextCard();
+}
+
+document.querySelectorAll(".filter").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    filter = btn.dataset.filter;
+    current = 0;
+    flipped = false;
+    renderCard();
+    renderStats();
+  });
+});
+
+$("cardBox").addEventListener("click", e => {
+  if (e.target.tagName.toLowerCase() === "button") return;
+  flipOrNext();
+});
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    flipOrNext();
+  }
+});
+
+document.querySelectorAll("[data-review]").forEach(btn => {
+  btn.addEventListener("click", () => review(btn.dataset.review));
+});
+
+$("search").addEventListener("input", () => { current = 0; flipped = false; renderCard(); });
+$("tagSelect").addEventListener("change", () => { current = 0; flipped = false; renderCard(); });
+$("shuffleBtn").addEventListener("click", () => {
+  const list = visibleCards();
+  current = list.length ? Math.floor(Math.random() * list.length) : 0;
+  flipped = false;
+  renderCard();
+});
+
+$("restoreBtn").addEventListener("click", () => {
+  if (confirm("初期単語を再読み込みします。今の学習状況は消えます。よろしいですか？")) restoreInitial(false);
+});
+
+$("clearBtn").addEventListener("click", () => {
+  if (confirm("学習データを初期状態に戻します。よろしいですか？")) restoreInitial(false);
+});
+
+$("exportBtn").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(cards, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "aya_vocab_backup.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$("importFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const imported = JSON.parse(text);
+    if (!Array.isArray(imported)) throw new Error("JSON must be an array");
+    cards = imported.map(normalize);
+    save();
+    current = 0;
+    flipped = false;
+    render();
+    alert("読み込みました。");
+  } catch(err) {
+    alert("読み込みに失敗しました: " + err.message);
+  }
+});
+
+$("addForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const card = normalize({
+    id: "aya-" + Date.now(),
+    word: fd.get("word"),
+    meaning: fd.get("meaning"),
+    example_en: fd.get("example_en"),
+    example_ja: fd.get("example_ja"),
+    note: fd.get("note"),
+    tag: fd.get("tag") || "追加",
+    level: fd.get("level"),
+    status: "new",
+    nextReview: today()
+  });
+  cards.unshift(card);
+  save();
+  e.target.reset();
+  filter = "all";
+  document.querySelectorAll(".filter").forEach(b => b.classList.toggle("active", b.dataset.filter === "all"));
+  current = 0;
+  flipped = false;
+  render();
+});
+
+
+function parseBulkLine(line) {
+  const delimiter = line.includes("\t") ? "\t" : ",";
+  return line.split(delimiter).map(x => x.trim());
+}
+
+const bulkBtn = document.getElementById("bulkAddBtn");
+if (bulkBtn) {
+  bulkBtn.addEventListener("click", () => {
+    const raw = document.getElementById("bulkInput").value.trim();
+    if (!raw) {
+      alert("追加したい単語を貼り付けてな。");
+      return;
+    }
+    const lines = raw.split(/\n+/).map(x => x.trim()).filter(Boolean);
+    let added = 0;
+    for (const line of lines) {
+      const parts = parseBulkLine(line);
+      const word = parts[0] || "";
+      const meaning = parts[1] || "";
+      if (!word || !meaning) continue;
+      const card = normalize({
+        id: "aya-" + Date.now() + "-" + Math.random().toString(36).slice(2,8),
+        word,
+        meaning,
+        example_en: parts[2] || "",
+        example_ja: parts[3] || "",
+        note: parts[4] || "",
+        tag: parts[5] || "一括追加",
+        level: parts[6] || "basic",
+        status: "new",
+        nextReview: today()
+      });
+      cards.unshift(card);
+      added++;
+    }
+    if (added === 0) {
+      alert("追加できる行が見つかりませんでした。最低でも word,意味 の形で入れてな。");
+      return;
+    }
+    save();
+    document.getElementById("bulkInput").value = "";
+    if (typeof filter !== "undefined") filter = "all";
+    document.querySelectorAll(".filter").forEach(b => b.classList.toggle("active", b.dataset.filter === "all"));
+    current = 0;
+    flipped = false;
+    render();
+    alert(added + "件追加しました。");
+  });
+}
+
+const sampleBtn = document.getElementById("sampleBulkBtn");
+if (sampleBtn) {
+  sampleBtn.addEventListener("click", () => {
+    document.getElementById("bulkInput").value = [
+      "prevent,防ぐ,This medicine helps prevent headaches.,この薬は頭痛を防ぐ助けになる。,prevent A from -ing も大事,日常会話,basic",
+      "attempt,試みる,I attempted to explain it in English.,私はそれを英語で説明しようと試みた。,tryより少し硬め,英作文,intermediate",
+      "cozy,居心地のよい,I want to have a cozy day at home.,家で居心地のいい一日を過ごしたい。,日記に似合う単語,日記,basic"
+    ].join("\n");
+  });
+}
+
+load();
+render();
+</script>
+</body>
+</html>
